@@ -1,0 +1,99 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        applicationId "com.xinhuamm.rtc"
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        //个推配置
+        manifestPlaceholders = [
+                GETUI_APP_ID    : "",
+                GETUI_APP_KEY   : "",
+                GETUI_APP_SECRET: "",
+                HUAWEI_APP_ID   : "",
+                XIAOMI_APP_ID   : "",
+                XIAOMI_APP_KEY  : "",
+                MEIZU_APP_ID    : "",
+                MEIZU_APP_KEY   : "",
+        ]
+        // 测试环境地址
+        buildConfigField("String", "RTC_HOST_COMMON", "\"https://testgusteau.xinhuaapp.com/server/ws\"")
+        buildConfigField("String", "RTC_HOST_SOCKET", "\"wss://testgusteau.xinhuaapp.com\"")
+        buildConfigField("String", "RTC_TENANT_ID", "\"1\"")
+
+        ndk {
+            // 注意：这里需要添加项目所需 CPU 类型的最小集
+            abiFilters "armeabi", "armeabi-v7a"//, "x86_64", "x86"
+        }
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        release_test{
+            debuggable true
+            matchingFallbacks = ['release', 'debug']
+            minifyEnabled false //混淆开启
+            shrinkResources false
+            zipAlignEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro', 'proguard-rules-rtc.pro'
+        }
+    }
+
+    // java8
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    android.applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def projectName = "XYRTCDemo"
+            def releaseApkName = projectName + ".apk"
+            outputFileName = new File("./", releaseApkName)
+        }
+    }
+}
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dependencies {
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    // 权限请求
+    implementation 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.5@aar'
+    // EventBus
+    implementation 'org.greenrobot:eventbus:3.1.1'
+    // 个推
+    implementation 'com.getui:sdk:2.14.0.0'
+    // 个推-华为厂商通道推送
+    api 'com.getui:hwp:1.0.6'
+    // 个推-魅族厂商通道推送
+    api 'com.getui:mzp:1.0.9'
+    // 个推-小米厂商通道推送
+    api 'com.getui:xmp:1.0.7'
+
+    // rtc-sdk(必须)
+    implementation 'mobile.xinhuamm:mobile_rtc:2.2.8'
+}
